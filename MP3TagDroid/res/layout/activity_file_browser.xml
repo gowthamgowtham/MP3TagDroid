@@ -1,0 +1,26 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".FileBrowserActivity" >
+
+    <TextView
+        android:id="@+id/textViewPath"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/file_browser_activity_path"
+        android:textSize="@dimen/file_browser_path_font_size" />
+
+    <ListView
+        android:id="@+id/listViewFiles"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+    </ListView>
+
+</LinearLayout>

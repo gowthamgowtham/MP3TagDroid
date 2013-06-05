@@ -4,5 +4,20 @@
     <string name="app_name">MP3TagDroid</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_file_browser">FileBrowserActivity</string>
+    <string name="file_browser_activity_path">/mnt/sdcard</string>
+    <string name="mp3_tag_viewer_file_path"></string>
+    <string name="tag_title"></string>
+    <string name="hint_no_file_loaded">No audio file loaded</string>
+    <string name="hint_title">Title</string>
+	<string name="hint_album">Album</string>
+	<string name="hint_artist">Artist</string>
+	<string name="hint_genre">Genre</string>
+	<string name="hint_album_art">Album Art</string>
+	<string name="button_load_audio_file_title">Load Audio File...</string>
+	<string name="label_title">Title</string>
+	<string name="label_album">Album</string>
+	<string name="label_artist">Artist</string>
+	<string name="label_genre">Genre</string>
 
 </resources>
