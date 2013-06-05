@@ -59,7 +59,6 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch(v.getId()) {
 			case R.id.buttonLoadAudioFile:
-				Toast.makeText(this, "Hey", Toast.LENGTH_LONG).show();
 				showFileBrowser();
 				break;
 			default:
