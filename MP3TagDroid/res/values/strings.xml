@@ -14,10 +14,11 @@
 	<string name="hint_artist">Artist</string>
 	<string name="hint_genre">Genre</string>
 	<string name="hint_album_art">Album Art</string>
-	<string name="button_load_audio_file_title">Load Audio File...</string>
+	<string name="button_load_audio_file_title">Load...</string>
 	<string name="label_title">Title</string>
 	<string name="label_album">Album</string>
 	<string name="label_artist">Artist</string>
 	<string name="label_genre">Genre</string>
+	<string name="label_album_art">Album Art</string>
 
 </resources>

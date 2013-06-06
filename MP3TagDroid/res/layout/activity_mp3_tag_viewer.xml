@@ -1,8 +1,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/LinearLayout1"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -12,28 +12,43 @@
 
     <ScrollView
         android:id="@+id/scrollView1"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/textViewAudioFilePath"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/hint_no_file_loaded"
-                android:text="@string/mp3_tag_viewer_file_path"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-
-            <Button
-                android:id="@+id/buttonLoadAudioFile"
-                style="?android:attr/buttonStyleSmall"
+            <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/button_load_audio_file_title" />
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/textViewAudioFilePath"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="false"
+                    android:layout_centerInParent="false"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/buttonLoadAudioFile"
+                    android:ellipsize="middle"
+                    android:hint="@string/hint_no_file_loaded"
+                    android:scrollHorizontally="true"
+                    android:text="@string/mp3_tag_viewer_file_path"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <Button
+                    android:id="@+id/buttonLoadAudioFile"
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:text="@string/button_load_audio_file_title" />
+
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/textViewTitleLabel"
@@ -91,12 +106,21 @@
                 android:hint="@string/hint_genre"
                 android:inputType="text" />
 
+            <TextView
+                android:id="@+id/textViewAlbumArtLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_album_art"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
             <ImageView
                 android:id="@+id/imageViewAlbumArt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:contentDescription="@string/hint_album_art"
                 android:src="@drawable/ic_launcher" />
+
         </LinearLayout>
 
     </ScrollView>
