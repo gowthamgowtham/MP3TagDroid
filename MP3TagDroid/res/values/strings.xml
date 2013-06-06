@@ -20,5 +20,6 @@
 	<string name="label_artist">Artist</string>
 	<string name="label_genre">Genre</string>
 	<string name="label_album_art">Album Art</string>
+	<string name="menu_about">About</string>
 
 </resources>

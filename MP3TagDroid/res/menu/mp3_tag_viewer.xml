@@ -4,6 +4,7 @@
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"/>
-    <item android:id="@+id/menu_load_audio_file"></item>
+    <item android:id="@+id/menu_load_audio_file" android:title="@string/button_load_audio_file_title"></item>
+    <item android:id="@+id/menu_about" android:title="@string/menu_about"></item>
 
 </menu>
