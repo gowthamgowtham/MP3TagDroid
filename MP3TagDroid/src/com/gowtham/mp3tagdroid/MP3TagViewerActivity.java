@@ -23,6 +23,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -71,6 +72,21 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		getMenuInflater().inflate(R.menu.mp3_tag_viewer, menu);
 		return true;
 	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()) {
+		case R.id.menu_load_audio_file:
+			showFileBrowser();
+			return true;
+		case R.id.menu_about:
+			showAbout();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
 
 	@Override
 	public void onClick(View v) {
@@ -197,6 +213,16 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		copy(src, dst);
 		src.delete();
 	}
+	
+	private void showAbout() {
+		AlertDialog.Builder b = new Builder(this);
+		b.setTitle("About MP3TagDroid 0.1");
+		b.setMessage("This program is free software, you may re-distribute it as you like.\n\n" +
+					 "Source code is available under GNU GPL @ https://github.com/gowthamgowtham/MP3TagDroid");
+		
+		b.create().show();
+	}
+
 	
 	/** Manages reading tags asynchronously in the background 
 	 * 
