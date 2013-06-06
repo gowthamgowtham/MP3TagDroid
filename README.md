@@ -5,6 +5,8 @@ Android app to view/edit audio file tags.
 
 Do you get annoyed by inaccurate/incorrect tags in your music collection? MP3TagDroid can help you fix that! Just load your audio file, make corrections and touch Save.
 
+MP3TagDroid tries to re-use an existing file manager to create a file browser dialog. I did not want to re-invent another file browser. So, you may have to install a file manager app to use MP3TagDroid. I use [X-plore](http://www.lonelycatgames.com/?app=xplore), but any other file manager that handles [ACTION_GET_CONTENT](http://developer.android.com/reference/android/content/Intent.html#ACTION_GET_CONTENT) should be okay.
+
 Disclaimer: This software is provided as is, no warranties please :)
 
 Screenshots
