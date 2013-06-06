@@ -1,6 +1,11 @@
 package com.gowtham.mp3tagdroid;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Vector;
 
 import org.cmc.music.metadata.IMusicMetadata;
@@ -24,9 +29,13 @@ import android.widget.Toast;
 public class MP3TagViewerActivity extends Activity implements OnClickListener {
 
 	private static final int REQUEST_CODE = 1;
-	private Button buttonLoadAudioFile;
+	private Button buttonLoadAudioFile, buttonSaveTags;
 	private TextView textViewAudioFilePath, editTextTitle, editTextAlbum, editTextArtist, editTextGenre;
 	private ImageView imageAlbumArt;
+	
+	private String audioFilePath;
+	private MusicMetadataSet metadataSet;
+	private IMusicMetadata metadata;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +43,8 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		setContentView(R.layout.activity_mp3_tag_viewer);
 		
 		buttonLoadAudioFile = (Button) findViewById(R.id.buttonLoadAudioFile);
+		buttonSaveTags = (Button) findViewById(R.id.buttonSave);
+		
 		textViewAudioFilePath = (TextView) findViewById(R.id.textViewAudioFilePath);
 		editTextTitle = (TextView) findViewById(R.id.editTextTitle);
 		editTextAlbum = (TextView) findViewById(R.id.editTextAlbum);
@@ -46,6 +57,7 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 
 	private void setListeners() {
 		buttonLoadAudioFile.setOnClickListener(this);
+		buttonSaveTags.setOnClickListener(this);
 	}
 
 	@Override
@@ -60,6 +72,9 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		switch(v.getId()) {
 			case R.id.buttonLoadAudioFile:
 				showFileBrowser();
+				break;
+			case R.id.buttonSave:
+				saveTags();
 				break;
 			default:
 				break;
@@ -86,8 +101,8 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		textViewAudioFilePath.setText(path);
 		MyID3 id3 = new MyID3();
 		
-		MusicMetadataSet meta = id3.read(new File(path));
-		IMusicMetadata metadata = meta.getSimplified();
+		metadataSet = id3.read(new File(path));
+		metadata = metadataSet.getSimplified();
 		showTags(metadata);
 	}
 	
@@ -97,7 +112,7 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		editTextAlbum.setText(metadata.getAlbum());
 		editTextArtist.setText(metadata.getArtist());
 		editTextGenre.setText(metadata.getGenreName());
-		Vector pictures = metadata.getPictures();
+		Vector<?> pictures = metadata.getPictures();
 		if(!pictures.isEmpty()) {
 			ImageData image = (ImageData)pictures.get(0);
 			Bitmap bmp = BitmapFactory.decodeByteArray(image.imageData, 0, image.imageData.length);
@@ -115,6 +130,7 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 
 	private void loadTags(String path) {
 		try {
+			audioFilePath = path;
 			loadTagsInternal(path);
 		}
 		catch(Exception e) {
@@ -127,5 +143,57 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		t.show();
 	}
 	
+	private void saveTags() {
+		if(audioFilePath == null || metadata == null || metadataSet == null)
+			return;
+		try {
+			saveTagsInternal();
+			Toast.makeText(this, "Save OK", Toast.LENGTH_LONG).show();
+		}
+		catch(Exception e) {
+			error(e);
+		}
+	}
+
+	private void saveTagsInternal() throws Exception {
+		metadata.setSongTitle(editTextTitle.getText().toString().trim());
+		metadata.setAlbum(editTextAlbum.getText().toString().trim());
+		metadata.setArtist(editTextArtist.getText().toString().trim());
+		metadata.setGenreName(editTextGenre.getText().toString().trim());
+		
+		File inputFile = new File(audioFilePath);
+		File cacheDir = getCacheDir();
+		File tempFile = File.createTempFile(inputFile.getName(), "temp", cacheDir);
+		new MyID3().write(inputFile, tempFile, metadataSet, metadata);
+		
+		move(tempFile, inputFile);
+	}	
 	
+	private void copy(File src, File dst) throws IOException {
+		InputStream in = null;
+	    OutputStream out = null;
+	    int len;
+	    byte []buf;
+	    
+		try {
+		    in = new FileInputStream(src);
+		    out = new FileOutputStream(dst);
+	
+		    buf = new byte[1024];
+		    while ((len = in.read(buf)) > 0)
+		        out.write(buf, 0, len);
+		}
+		finally {
+			if(in != null)
+				in.close();
+			if(out != null)
+				out.close();
+		}
+	}
+	
+	private void move(File src, File dst) throws IOException {
+		// First copy and then delete the source file if successful
+		copy(src, dst);
+		src.delete();
+	}
 }
