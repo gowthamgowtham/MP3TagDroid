@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/menu_remove_album_art" android:titleCondensed="@string/menu_remove_album_art_short" android:title="@string/menu_remove_album_art"></item>
+    <item android:id="@+id/menu_revert_album_art" android:titleCondensed="@string/menu_revert_album_art_short" android:title="@string/menu_revert_album_art"></item>
+    
+
+</menu>

@@ -22,10 +22,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -35,13 +39,14 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 
 	private static final int REQUEST_CODE = 1;
 	private Button buttonLoadAudioFile, buttonSaveTags;
-	private TextView textViewAudioFilePath, editTextTitle, editTextAlbum, editTextArtist, editTextGenre;
+	private TextView textViewAudioFilePath, editTextTitle, editTextAlbum, editTextArtist, editTextGenre, textViewAlbumArtLabel;
 	private ImageView imageAlbumArt;
 	
 	private String audioFilePath;
 	private MusicMetadataSet metadataSet;
 	private IMusicMetadata metadata;
 	private ProgressDialog progressDialog;
+	private boolean deleteAlbumArt;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,7 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		buttonSaveTags = (Button) findViewById(R.id.buttonSave);
 		
 		textViewAudioFilePath = (TextView) findViewById(R.id.textViewAudioFilePath);
+		textViewAlbumArtLabel = (TextView) findViewById(R.id.textViewAlbumArtLabel);
 		editTextTitle = (TextView) findViewById(R.id.editTextTitle);
 		editTextAlbum = (TextView) findViewById(R.id.editTextAlbum);
 		editTextArtist = (TextView) findViewById(R.id.editTextArtist);
@@ -64,13 +70,47 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 	private void setListeners() {
 		buttonLoadAudioFile.setOnClickListener(this);
 		buttonSaveTags.setOnClickListener(this);
+		registerForContextMenu(imageAlbumArt);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.mp3_tag_viewer, menu);
 		return true;
+	}
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		if( v.getId() == R.id.imageViewAlbumArt ) {
+			AdapterView.AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+			menu.setHeaderTitle(R.string.album_art_context_menu_title);
+			getMenuInflater().inflate(R.menu.album_art_context_menu, menu);
+		}
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_remove_album_art:
+			markAlbumArtForDeletion();
+			break;
+		case R.id.menu_revert_album_art:
+			revertDeletedAlbumArt();
+			break;
+		default:
+			break;
+		}
+		return true;
+	}
+
+	private void revertDeletedAlbumArt() {
+		deleteAlbumArt = false;
+		imageAlbumArt.getDrawable().setAlpha(255);
+	}
+
+	private void markAlbumArtForDeletion() {
+		deleteAlbumArt = true;
+		imageAlbumArt.getDrawable().setAlpha(64);
 	}
 	
 	@Override
@@ -135,6 +175,7 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		editTextGenre.setText(metadata.getGenreName());
 		Vector<?> pictures = metadata.getPictures();
 		if(!pictures.isEmpty()) {
+			textViewAlbumArtLabel.setVisibility(View.VISIBLE);
 			ImageData image = (ImageData)pictures.get(0);
 			Bitmap bmp = BitmapFactory.decodeByteArray(image.imageData, 0, image.imageData.length);
 			imageAlbumArt.setImageBitmap(bmp);
@@ -142,10 +183,12 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 	}
 	
 	private void clearTags() {
+		deleteAlbumArt = false;
 		editTextTitle.setText("");
 		editTextAlbum.setText("");
 		editTextArtist.setText("");
 		editTextGenre.setText("");
+		textViewAlbumArtLabel.setVisibility(View.INVISIBLE);
 		imageAlbumArt.setImageResource(android.R.color.transparent);
 	}
 
@@ -183,7 +226,7 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		progressDialog.setTitle("Saving tags...");
 		progressDialog.show();
 		TagsWriterAsyncTask task = new TagsWriterAsyncTask();
-		task.execute(null);
+		task.execute((Void[])null);
 	}	
 	
 	private void copy(File src, File dst) throws IOException {
@@ -228,20 +271,28 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 	 * 
 	 * @author Gowtham
 	 */
-	private class TagsReaderAsyncTask extends AsyncTask<File, Void, MusicMetadataSet> {
+	private class TagsReaderAsyncTask extends AsyncTask<File, String, MusicMetadataSet> {
 
 		private Exception e;
 		
 		@Override
 		protected MusicMetadataSet doInBackground(File... files) {
 			try {
+				publishProgress("Reading audio file...");
 				MyID3 id3 = new MyID3();
 				metadataSet = id3.read(files[0]);
+				
+				publishProgress("Done");
 			}
 			catch(Exception e) {
 				this.e = e;
 			}
 			return metadataSet;
+		}
+		
+		@Override
+		protected void onProgressUpdate(String... msgs) {
+			progressDialog.setMessage(msgs[0]);
 		}
 		
 		@Override
@@ -266,7 +317,7 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 	 * @author Gowtham
 	 *
 	 */
-	private class TagsWriterAsyncTask extends AsyncTask<Void,Void,Object> {
+	private class TagsWriterAsyncTask extends AsyncTask<Void,String,Object> {
 
 		private Exception e;
 		
@@ -275,24 +326,37 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 			metadata.setSongTitle(editTextTitle.getText().toString().trim());
 			metadata.setAlbum(editTextAlbum.getText().toString().trim());
 			metadata.setArtist(editTextArtist.getText().toString().trim());
-			metadata.setGenreName(editTextGenre.getText().toString().trim());			
+			metadata.setGenreName(editTextGenre.getText().toString().trim());
+			if(deleteAlbumArt)
+				metadata.clearPictures();
 		}
 		
 		@Override
 		protected Object doInBackground(Void... arg0) {
 			
 			try {
+				publishProgress("Preparing files...");
 				File inputFile = new File(audioFilePath);
 				File cacheDir = getCacheDir();
 				File tempFile = File.createTempFile(inputFile.getName(), "temp", cacheDir);
+				
+				publishProgress("Compiling and writing tags...");
 				new MyID3().write(inputFile, tempFile, metadataSet, metadata);
 				
+				publishProgress("Moving file");
 				move(tempFile, inputFile);
+				
+				publishProgress("Done");
 			} catch(Exception e) {
 				this.e = e;
 			}
 			
 			return null;
+		}
+		
+		@Override
+		protected void onProgressUpdate(String... msg) {
+			progressDialog.setMessage(msg[0]);
 		}
 		
 		@Override

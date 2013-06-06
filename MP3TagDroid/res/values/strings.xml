@@ -22,5 +22,10 @@
 	<string name="label_album_art">Album Art</string>
 	<string name="menu_about">About</string>
 	<string name="button_save_title">Save</string>
+	<string name="menu_remove_album_art">Remove Album Art</string>
+	<string name="menu_remove_album_art_short">Remove</string>
+	<string name="menu_revert_album_art">Revert Album Art</string>
+	<string name="menu_revert_album_art_short">Revert</string>
+	<string name="album_art_context_menu_title">Album Art Options</string>
 
 </resources>
