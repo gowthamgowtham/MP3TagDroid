@@ -14,9 +14,13 @@ import org.cmc.music.metadata.MusicMetadataSet;
 import org.cmc.music.myid3.MyID3;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
@@ -36,6 +40,7 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 	private String audioFilePath;
 	private MusicMetadataSet metadataSet;
 	private IMusicMetadata metadata;
+	private ProgressDialog progressDialog;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -99,11 +104,11 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 
 	private void loadTagsInternal(String path) throws Exception {
 		textViewAudioFilePath.setText(path);
-		MyID3 id3 = new MyID3();
-		
-		metadataSet = id3.read(new File(path));
-		metadata = metadataSet.getSimplified();
-		showTags(metadata);
+		TagsReaderAsyncTask task = new TagsReaderAsyncTask();
+		progressDialog = new ProgressDialog(this, ProgressDialog.STYLE_SPINNER);
+		progressDialog.setTitle("Loading tags...");
+		progressDialog.show();
+		task.execute(new File(path));
 	}
 	
 	private void showTags(IMusicMetadata metadata) {
@@ -140,7 +145,10 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 	
 	private void error(Exception e) {
 		Toast t = Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG);
-		t.show();
+		AlertDialog.Builder b = new Builder(this);
+		b.setTitle("ERROR: " + e.getMessage());
+		b.setCancelable(true);
+		b.create().show();
 	}
 	
 	private void saveTags() {
@@ -148,7 +156,6 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 			return;
 		try {
 			saveTagsInternal();
-			Toast.makeText(this, "Save OK", Toast.LENGTH_LONG).show();
 		}
 		catch(Exception e) {
 			error(e);
@@ -156,17 +163,11 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 	}
 
 	private void saveTagsInternal() throws Exception {
-		metadata.setSongTitle(editTextTitle.getText().toString().trim());
-		metadata.setAlbum(editTextAlbum.getText().toString().trim());
-		metadata.setArtist(editTextArtist.getText().toString().trim());
-		metadata.setGenreName(editTextGenre.getText().toString().trim());
-		
-		File inputFile = new File(audioFilePath);
-		File cacheDir = getCacheDir();
-		File tempFile = File.createTempFile(inputFile.getName(), "temp", cacheDir);
-		new MyID3().write(inputFile, tempFile, metadataSet, metadata);
-		
-		move(tempFile, inputFile);
+		progressDialog = new ProgressDialog(this, ProgressDialog.STYLE_SPINNER);
+		progressDialog.setTitle("Saving tags...");
+		progressDialog.show();
+		TagsWriterAsyncTask task = new TagsWriterAsyncTask();
+		task.execute(null);
 	}	
 	
 	private void copy(File src, File dst) throws IOException {
@@ -195,5 +196,86 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		// First copy and then delete the source file if successful
 		copy(src, dst);
 		src.delete();
+	}
+	
+	/** Manages reading tags asynchronously in the background 
+	 * 
+	 * @author Gowtham
+	 */
+	private class TagsReaderAsyncTask extends AsyncTask<File, Void, MusicMetadataSet> {
+
+		private Exception e;
+		
+		@Override
+		protected MusicMetadataSet doInBackground(File... files) {
+			try {
+				MyID3 id3 = new MyID3();
+				metadataSet = id3.read(files[0]);
+			}
+			catch(Exception e) {
+				this.e = e;
+			}
+			return metadataSet;
+		}
+		
+		@Override
+		protected void onPostExecute(MusicMetadataSet result) {
+			progressDialog.dismiss();
+			if(result == null) {
+				error(getException());
+			} else {
+				metadataSet = result;
+				metadata = metadataSet.getSimplified();
+				showTags(metadata);
+			}
+		}
+		
+		public Exception getException() {
+			return e;
+		}
+	}
+	
+	/** Manages writing tags asynchronously in the background
+	 * 
+	 * @author Gowtham
+	 *
+	 */
+	private class TagsWriterAsyncTask extends AsyncTask<Void,Void,Object> {
+
+		private Exception e;
+		
+		@Override
+		protected void onPreExecute() {
+			metadata.setSongTitle(editTextTitle.getText().toString().trim());
+			metadata.setAlbum(editTextAlbum.getText().toString().trim());
+			metadata.setArtist(editTextArtist.getText().toString().trim());
+			metadata.setGenreName(editTextGenre.getText().toString().trim());			
+		}
+		
+		@Override
+		protected Object doInBackground(Void... arg0) {
+			
+			try {
+				File inputFile = new File(audioFilePath);
+				File cacheDir = getCacheDir();
+				File tempFile = File.createTempFile(inputFile.getName(), "temp", cacheDir);
+				new MyID3().write(inputFile, tempFile, metadataSet, metadata);
+				
+				move(tempFile, inputFile);
+			} catch(Exception e) {
+				this.e = e;
+			}
+			
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Object result) {
+			progressDialog.dismiss();
+		}
+		
+		public Exception getException() {
+			return this.e;
+		}
 	}
 }
