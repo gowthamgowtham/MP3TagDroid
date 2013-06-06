@@ -11,7 +11,8 @@ Disclaimer: This software is provided as is, no warranties please :)
 
 Screenshots
 -----------
-![Screenshot without audio file](https://github.com/gowthamgowtham/MP3TagDroid/blob/master/MP3TagDroid/screens/main_screen_no_audio_file.png?raw=true)   ![Screenshot with audio file](https://github.com/gowthamgowtham/MP3TagDroid/blob/master/MP3TagDroid/screens/main_screen_with_audio_file.png?raw=true)
+<img alt="Screenshot without audio file" src="https://github.com/gowthamgowtham/MP3TagDroid/blob/master/MP3TagDroid/screens/main_screen_no_audio_file.png?raw=true" style="padding: 5px 5px 5px 5px;"/>
+<img alt="Screenshot with audio file" src="https://github.com/gowthamgowtham/MP3TagDroid/blob/master/MP3TagDroid/screens/main_screen_with_audio_file.png?raw=true" style="padding: 5px 5px 5px 5px;"/>
 
 Current Status
 --------------
