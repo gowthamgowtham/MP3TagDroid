@@ -18,6 +18,8 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -64,7 +66,65 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		editTextGenre = (TextView) findViewById(R.id.editTextGenre);
 		imageAlbumArt = (ImageView) findViewById(R.id.imageViewAlbumArt);
 		
+				
+		
 		setListeners();
+	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		
+//		SharedPreferences pref = getSharedPreferences("tag_details", MODE_PRIVATE);
+//		String savedPath = pref.getString("audio_file_path", null);
+//		if(savedPath == null)
+//			return;
+//		audioFilePath = savedPath;
+//		if(!new File(audioFilePath).exists())
+//			return;
+//		// After loading the audio file again, overwrite the tags in UI with user set values
+//		loadTags(audioFilePath);
+//		if(pref.contains("title"))
+//			editTextTitle.setText(pref.getString("title", ""));
+//		if(pref.contains("album"))
+//			editTextAlbum.setText(pref.getString("album", ""));
+//		if(pref.contains("artist"))
+//			editTextArtist.setText(pref.getString("artist", ""));
+//		if(pref.contains("genre"))
+//			editTextGenre.setText(pref.getString("genre", ""));
+//		if(pref.contains("delete_album_art_image"))
+//			deleteAlbumArt = pref.getBoolean("delete_album_art_image", false);
+//		
+//		Editor editor = pref.edit();
+//		editor.clear();
+//		editor.commit();
+//		
+//		Toast.makeText(this, "Prefs loaded", Toast.LENGTH_LONG).show();
+//		if(deleteAlbumArt)
+//			markAlbumArtForDeletion();
+//		
+		
+	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		
+//		SharedPreferences pref = getSharedPreferences("tag_details", MODE_PRIVATE);
+//		Editor editor = pref.edit();
+//		
+//		editor.putString("audio_file_path", audioFilePath);
+//		if(editTextTitle.getText().length()!=0)
+//			editor.putString("title", editTextTitle.getText().toString());
+//		if(editTextAlbum.getText().length()!=0)
+//			editor.putString("album", editTextAlbum.getText().toString());
+//		if(editTextArtist.getText().length()!=0)
+//			editor.putString("artist", editTextArtist.getText().toString());
+//		if(editTextGenre.getText().length()!=0)
+//			editor.putString("genre", editTextGenre.getText().toString());
+//		
+//		editor.putBoolean("delete_album_art_image", deleteAlbumArt);
+//		editor.commit();
 	}
 
 	private void setListeners() {
@@ -176,6 +236,7 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		Vector<?> pictures = metadata.getPictures();
 		if(!pictures.isEmpty()) {
 			textViewAlbumArtLabel.setVisibility(View.VISIBLE);
+			imageAlbumArt.setVisibility(View.VISIBLE);
 			ImageData image = (ImageData)pictures.get(0);
 			Bitmap bmp = BitmapFactory.decodeByteArray(image.imageData, 0, image.imageData.length);
 			imageAlbumArt.setImageBitmap(bmp);
@@ -189,7 +250,8 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		editTextArtist.setText("");
 		editTextGenre.setText("");
 		textViewAlbumArtLabel.setVisibility(View.INVISIBLE);
-		imageAlbumArt.setImageResource(android.R.color.transparent);
+		imageAlbumArt.setVisibility(View.INVISIBLE);
+		//imageAlbumArt.setImageResource(android.R.color.transparent);
 	}
 
 	private void loadTags(String path) {
@@ -362,6 +424,8 @@ public class MP3TagViewerActivity extends Activity implements OnClickListener {
 		@Override
 		protected void onPostExecute(Object result) {
 			progressDialog.dismiss();
+			if(e != null)
+				error(e);
 		}
 		
 		public Exception getException() {
